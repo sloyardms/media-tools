@@ -28,11 +28,11 @@ public final class NameMatcher {
     }
 
     private final Set<String> markers;
-    private final int hashThreshold;
+    private final int maxDistance;
 
-    public NameMatcher(Set<String> markers, int hashThreshold) {
+    public NameMatcher(Set<String> markers, int maxDistance) {
         this.markers = markers;
-        this.hashThreshold = hashThreshold;
+        this.maxDistance = maxDistance;
     }
 
     public NameKey parse(Path file) {
@@ -105,14 +105,14 @@ public final class NameMatcher {
                 }
             }
 
-            if (closest != null && closestDistance <= hashThreshold) {
+            if (closest != null && closestDistance <= maxDistance) {
                 String note = marked.get(closest.path()) && !currentMarked ? "kept file has the thumbnail name" : "";
                 duplicates.add(new DuplicatePair(closest.info(), current.info(), DuplicatePair.MatchMethod.NAME,
                         closestDistance, note));
                 removed.add(current.path());
             } else if (closest != null) {
                 review.add(new ReviewPair(closest.info(), current.info(), closestDistance,
-                        "images differ (distance " + closestDistance + " > " + hashThreshold + ")"));
+                        "images differ (distance " + closestDistance + " > " + maxDistance + ")"));
             } else if (sameSize != null) {
                 review.add(new ReviewPair(sameSize.info(), current.info(),
                         DHash.distance(sameSize.hash(), current.hash()), "same dimensions"));

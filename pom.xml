@@ -18,6 +18,7 @@
         <main.class>sloyardms.mediatools.App</main.class>
 
         <twelvemonkeys.version>3.12.0</twelvemonkeys.version>
+        <metadata-extractor.version>2.19.0</metadata-extractor.version>
         <junit.version>5.11.4</junit.version>
     </properties>
 
@@ -43,6 +44,11 @@
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
             <version>${twelvemonkeys.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>${metadata-extractor.version}</version>
         </dependency>
 
         <dependency>

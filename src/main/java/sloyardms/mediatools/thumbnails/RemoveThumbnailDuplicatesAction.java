@@ -39,16 +39,18 @@ public final class RemoveThumbnailDuplicatesAction implements MenuAction {
     public void run(ConsoleIO io) throws IOException {
         Path root = io.askExistingDirectory("Folder to scan: ");
         boolean recursive = io.askYesNo("Include subfolders?", true);
-        int threshold = io.askInt("dHash threshold (max differing bits, 0-64)",
-                ThumbnailOptions.DEFAULT_HASH_THRESHOLD, 0, 64);
+        int nameMaxDistance = io.askInt("Max dHash distance to confirm a name match (0-64)",
+                ThumbnailOptions.DEFAULT_NAME_MATCH_MAX_DISTANCE, 0, 64);
+        int hashMaxDistance = io.askInt("Max dHash distance for a hash-only match (0-64)",
+                ThumbnailOptions.DEFAULT_HASH_MATCH_MAX_DISTANCE, 0, 64);
         double tolerancePercent = io.askDouble("Aspect ratio tolerance for hash matches, in %",
                 ThumbnailOptions.DEFAULT_ASPECT_TOLERANCE * 100, 0, 50);
-        ThumbnailOptions options = new ThumbnailOptions(root, recursive, threshold, tolerancePercent / 100,
-                ThumbnailOptions.DEFAULT_MARKERS);
+        ThumbnailOptions options = new ThumbnailOptions(root, recursive, nameMaxDistance, hashMaxDistance,
+                tolerancePercent / 100, ThumbnailOptions.DEFAULT_MARKERS);
 
         DuplicateFinder.Result result = new DuplicateFinder(options).find(new ConsoleProgress(io));
         io.printf("Scanned %d image(s).%n", result.imagesScanned());
-        PairTable.print(io, root, result);
+        PairTable.print(io, options, result);
 
         if (result.duplicates().isEmpty()) {
             io.println();

@@ -17,11 +17,11 @@ import sloyardms.mediatools.image.DHash;
  */
 public final class HashMatcher {
 
-    private final int hashThreshold;
+    private final int maxDistance;
     private final double aspectTolerance;
 
-    public HashMatcher(int hashThreshold, double aspectTolerance) {
-        this.hashThreshold = hashThreshold;
+    public HashMatcher(int maxDistance, double aspectTolerance) {
+        this.maxDistance = maxDistance;
         this.aspectTolerance = aspectTolerance;
     }
 
@@ -63,7 +63,7 @@ public final class HashMatcher {
                     continue;
                 }
                 int distance = DHash.distance(kept.hash(), candidate.hash());
-                if (distance <= hashThreshold) {
+                if (distance <= maxDistance) {
                     out.add(new DuplicatePair(kept.info(), candidate.info(), DuplicatePair.MatchMethod.HASH, distance, ""));
                     assigned.add(candidate.path());
                 }

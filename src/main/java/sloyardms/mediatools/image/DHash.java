@@ -27,16 +27,20 @@ public final class DHash {
     private DHash() {
     }
 
-    /** Result of hashing a file, with the dimensions taken from its header. */
+    /** Result of hashing a file, with the displayed dimensions taken from its header and EXIF orientation. */
     public record Result(ImageInfo info, long hash) {
     }
 
+    /** Hashes the image as displayed, i.e. after applying its EXIF orientation. */
     public static Result compute(Path file) throws IOException {
+        int orientation = ExifOrientation.read(file);
         return ImageReaders.withReader(file, reader -> {
             int width = reader.getWidth(0);
             int height = reader.getHeight(0);
-            ImageInfo info = new ImageInfo(file, width, height, reader.getFormatName().toLowerCase(Locale.ROOT));
-            return new Result(info, compute(decodeReduced(reader, width, height)));
+            ImageInfo info = ImageInfo.displayed(file, width, height, orientation,
+                    reader.getFormatName().toLowerCase(Locale.ROOT));
+            BufferedImage upright = ExifOrientation.apply(decodeReduced(reader, width, height), orientation);
+            return new Result(info, compute(upright));
         });
     }
 

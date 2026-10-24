@@ -43,7 +43,7 @@ class DHashTest {
         assertEquals(4000, large.info().width());
         assertEquals(120, small.info().height());
         int distance = DHash.distance(large.hash(), small.hash());
-        assertTrue(distance <= ThumbnailOptions.DEFAULT_HASH_THRESHOLD,
+        assertTrue(distance <= ThumbnailOptions.DEFAULT_HASH_MATCH_MAX_DISTANCE,
                 "original vs thumbnail distance was " + distance);
     }
 
@@ -55,7 +55,7 @@ class DHashTest {
             long b = DHash.compute(SampleImages.scene(seed + 100, 400, 300));
             closest = Math.min(closest, DHash.distance(a, b));
         }
-        assertTrue(closest > ThumbnailOptions.DEFAULT_HASH_THRESHOLD, "closest unrelated distance was " + closest);
+        assertTrue(closest > ThumbnailOptions.DEFAULT_NAME_MATCH_MAX_DISTANCE, "closest unrelated distance was " + closest);
     }
 
     @Test

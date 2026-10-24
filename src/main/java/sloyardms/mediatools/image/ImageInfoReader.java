@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
 
-/** Reads image dimensions from the header only; pixel data is never decoded. */
+/** Reads displayed image dimensions from the header and EXIF orientation; pixel data is never decoded. */
 public final class ImageInfoReader {
 
     private ImageInfoReader() {
     }
 
     public static ImageInfo read(Path file) throws IOException {
-        return ImageReaders.withReader(file, reader -> new ImageInfo(
-                file, reader.getWidth(0), reader.getHeight(0), reader.getFormatName().toLowerCase(Locale.ROOT)));
+        int orientation = ExifOrientation.read(file);
+        return ImageReaders.withReader(file, reader -> ImageInfo.displayed(
+                file, reader.getWidth(0), reader.getHeight(0), orientation,
+                reader.getFormatName().toLowerCase(Locale.ROOT)));
     }
 }

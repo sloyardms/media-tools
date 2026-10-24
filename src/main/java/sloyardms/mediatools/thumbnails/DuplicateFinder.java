@@ -80,7 +80,7 @@ public final class DuplicateFinder {
 
     /** Matching step on already hashed images, exposed for tests. */
     public Result match(List<HashedImage> images, List<Path> unreadable) {
-        NameMatcher.Result byName = new NameMatcher(options.thumbnailMarkers(), options.hashThreshold()).match(images);
+        NameMatcher.Result byName = new NameMatcher(options.thumbnailMarkers(), options.nameMatchMaxDistance()).match(images);
 
         Set<Path> removedByName = new HashSet<>();
         Set<Path> protectedFiles = new HashSet<>();
@@ -94,7 +94,7 @@ public final class DuplicateFinder {
         }
 
         List<HashedImage> remaining = images.stream().filter(i -> !removedByName.contains(i.path())).toList();
-        List<DuplicatePair> byHash = new HashMatcher(options.hashThreshold(), options.aspectTolerance())
+        List<DuplicatePair> byHash = new HashMatcher(options.hashMatchMaxDistance(), options.aspectTolerance())
                 .match(remaining, protectedFiles);
 
         List<DuplicatePair> duplicates = new ArrayList<>(byName.duplicates());

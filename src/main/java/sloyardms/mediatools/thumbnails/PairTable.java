@@ -14,14 +14,16 @@ final class PairTable {
     private PairTable() {
     }
 
-    static void print(ConsoleIO io, Path root, DuplicateFinder.Result result) {
+    static void print(ConsoleIO io, ThumbnailOptions options, DuplicateFinder.Result result) {
+        Path root = options.root();
         io.println();
-        io.printf("Duplicates to remove (%d):%n", result.duplicates().size());
+        io.printf("Duplicates to remove (%d). Distance = differing dHash bits; NAME needs <= %d, HASH needs <= %d:%n",
+                result.duplicates().size(), options.nameMatchMaxDistance(), options.hashMatchMaxDistance());
         if (result.duplicates().isEmpty()) {
             io.println("  (none)");
         } else {
             List<String[]> rows = new ArrayList<>();
-            rows.add(new String[] {"#", "Kept", "Size", "Removed", "Size", "Method", "Dist", "Note"});
+            rows.add(new String[] {"#", "Kept", "Size", "Removed", "Size", "Method", "Distance", "Note"});
             int n = 1;
             for (DuplicatePair p : result.duplicates()) {
                 rows.add(new String[] {Integer.toString(n++), relative(root, p.kept().path()), p.kept().dimensions(),
@@ -36,7 +38,7 @@ final class PairTable {
             io.printf("Needs review (name match, images differ) (%d) - these are NOT removed:%n",
                     result.needsReview().size());
             List<String[]> rows = new ArrayList<>();
-            rows.add(new String[] {"#", "Larger", "Size", "Smaller", "Size", "Dist", "Reason"});
+            rows.add(new String[] {"#", "Larger", "Size", "Smaller", "Size", "Distance", "Reason"});
             int n = 1;
             for (ReviewPair p : result.needsReview()) {
                 rows.add(new String[] {Integer.toString(n++), relative(root, p.larger().path()), p.larger().dimensions(),

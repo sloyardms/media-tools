@@ -44,18 +44,19 @@ class RemoveThumbnailDuplicatesActionTest {
     void dryRunPrintsTablesAndChangesNothingWhenDeclined() throws IOException {
         List<Path> before = listAll();
 
-        run(root + "\n\n\n\nn\n");
+        run(root + "\n\n\n\n\nn\n");
 
         assertEquals(before, listAll());
         String text = output.toString(StandardCharsets.UTF_8);
         assertTrue(text.contains("Duplicates to remove (7)"), text);
+        assertTrue(text.contains("NAME needs <= 10, HASH needs <= 6"), text);
         assertTrue(text.contains("Needs review (name match, images differ) (1)"), text);
         assertTrue(text.contains("Cancelled"), text);
     }
 
     @Test
     void confirmedRunMovesDuplicatesSkipsReviewAndWritesLog() throws IOException {
-        run("\"" + root + "\"\ny\n\n\ny\n");
+        run("\"" + root + "\"\ny\n\n\n\ny\n");
 
         assertFalse(Files.exists(root.resolve("sunset.md.jpg")));
         assertTrue(Files.exists(root.resolve("_removed/sunset.md.jpg")));
@@ -75,7 +76,7 @@ class RemoveThumbnailDuplicatesActionTest {
     @Test
     void nothingToRemoveSkipsConfirmation() throws IOException {
         Path empty = Files.createDirectories(root.resolve("empty"));
-        run(empty + "\nn\n\n\n");
+        run(empty + "\nn\n\n\n\n");
         assertTrue(output.toString(StandardCharsets.UTF_8).contains("Nothing to remove."));
     }
 

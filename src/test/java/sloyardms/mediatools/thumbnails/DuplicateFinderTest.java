@@ -76,7 +76,7 @@ class DuplicateFinderTest {
         ReviewPair review = recursive.needsReview().get(0);
         assertEquals("city.jpg", name(review.larger().path()));
         assertEquals("city.md.jpg", name(review.smaller().path()));
-        assertTrue(review.distance() > ThumbnailOptions.DEFAULT_HASH_THRESHOLD);
+        assertTrue(review.distance() > ThumbnailOptions.DEFAULT_NAME_MATCH_MAX_DISTANCE);
 
         assertFalse(removedToKept(recursive).containsKey("city.md.jpg"));
         assertFalse(removedToKept(recursive).containsKey("city.jpg"));
@@ -104,7 +104,7 @@ class DuplicateFinderTest {
 
     @Test
     void stricterThresholdTurnsNameMatchesIntoReview() throws IOException {
-        ThumbnailOptions strict = new ThumbnailOptions(root, true, 0, 0.02, ThumbnailOptions.DEFAULT_MARKERS);
+        ThumbnailOptions strict = new ThumbnailOptions(root, true, 0, 0, 0.02, ThumbnailOptions.DEFAULT_MARKERS);
         DuplicateFinder.Result result = new DuplicateFinder(strict).find(DuplicateFinder.Progress.NONE);
         // Nothing is ever removed without its hash agreeing.
         for (DuplicatePair pair : result.duplicates()) {

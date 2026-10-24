@@ -74,7 +74,15 @@ public final class SampleImages {
         }
     }
 
-    public static Path writeJpeg(BufferedImage image, Path file, float quality) {
+    public static Path writeJpeg(BufferedImage source, Path file, float quality) {
+        BufferedImage image = source;
+        if (source.getType() != BufferedImage.TYPE_INT_RGB) {
+            // JPEG has no alpha channel.
+            image = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+            g.drawImage(source, 0, 0, null);
+            g.dispose();
+        }
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
         ImageWriter writer = writers.next();
         try {
@@ -92,6 +100,37 @@ public final class SampleImages {
             throw new UncheckedIOException(e);
         } finally {
             writer.dispose();
+        }
+    }
+
+    /**
+     * Adds an EXIF APP1 segment holding only the orientation tag to an existing JPEG, right after its JFIF APP0
+     * segment (or after SOI if there is none).
+     */
+    public static Path addExifOrientation(Path jpeg, int orientation) {
+        try {
+            byte[] data = Files.readAllBytes(jpeg);
+            int insertAt = 2;
+            if ((data[2] & 0xFF) == 0xFF && (data[3] & 0xFF) == 0xE0) {
+                insertAt = 4 + (((data[4] & 0xFF) << 8) | (data[5] & 0xFF));
+            }
+            byte[] tiff = {
+                    'M', 'M', 0, 42, 0, 0, 0, 8,                          // big-endian TIFF header, IFD0 at 8
+                    0, 1,                                                 // one entry
+                    0x01, 0x12, 0, 3, 0, 0, 0, 1, 0, (byte) orientation, 0, 0, // Orientation, SHORT, count 1
+                    0, 0, 0, 0};                                          // no next IFD
+            byte[] exifHeader = {'E', 'x', 'i', 'f', 0, 0};
+            int length = 2 + exifHeader.length + tiff.length;
+
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            out.write(data, 0, insertAt);
+            out.write(new byte[] {(byte) 0xFF, (byte) 0xE1, (byte) (length >> 8), (byte) length});
+            out.write(exifHeader);
+            out.write(tiff);
+            out.write(data, insertAt, data.length - insertAt);
+            return Files.write(jpeg, out.toByteArray());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
